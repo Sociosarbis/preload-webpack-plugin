@@ -736,4 +736,46 @@ module.exports = ({descriptionPrefix, webpack, HtmlWebpackPlugin}) => {
       compiler.outputFileSystem = new MemoryFileSystem();
     });
   });
+
+  describe(`${descriptionPrefix} When useScript is used,`, function () {
+    it(`should not have any link element until 1500ms have passed`, function (done) {
+      const compiler = webpack({
+        entry: {
+          js: path.join(__dirname, 'fixtures', 'file.js')
+        },
+        output: {
+          path: OUTPUT_DIR,
+          filename: 'bundle.js',
+          chunkFilename: '[name].[chunkhash].js',
+          publicPath: '/',
+        },
+        plugins: [
+          new HtmlWebpackPlugin(),
+          new PreloadPlugin({
+            useScript: true,
+            rel: 'prefetch'
+          })
+        ]
+      }, function (err, result) {
+        expect(err).toBeFalsy(err);
+        expect(result.compilation.errors.length).toBe(0,
+          result.compilation.errors.join('\n=========\n'));
+
+        const html = result.compilation.assets['index.html'].source();
+        const dom = new JSDOM(html, { runScripts: 'dangerously' });
+        const links = dom.window.document.head.querySelectorAll('link');
+        expect(links.length).toBe(0);
+        expect(dom.window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__.length).toBe(1);
+          setTimeout(() => {
+          const links = dom.window.document.head.querySelectorAll('link');
+          expect(links.length).toBe(1);
+          expect(links[0].getAttribute('rel')).toBe('preload');
+          expect(links[0].getAttribute('as')).toBe('script');
+          expect(links[0].getAttribute('href')).toMatch(new RegExp('^/chunk\\.'));
+          done();
+        }, 1500)
+      });
+      compiler.outputFileSystem = new MemoryFileSystem();
+    });
+  });
 };

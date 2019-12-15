@@ -19,7 +19,8 @@ const defaultOptions = {
   rel: 'preload',
   include: 'asyncChunks',
   excludeHtmlNames: [],
-  fileBlacklist: [/\.map/]
+  fileBlacklist: [/\.map/],
+  scriptDelay: 1000
 };
 
 module.exports = defaultOptions;
