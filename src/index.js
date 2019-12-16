@@ -21,7 +21,7 @@ const createHTMLElementString = require('./lib/create-html-element-string');
 const defaultOptions = require('./lib/default-options');
 const determineAsValue = require('./lib/determine-as-value');
 const extractChunks = require('./lib/extract-chunks');
-const { insertLinksIntoHead, inserLinksIntoHeadWithScript } = require('./lib/insert-links-into-head');
+const insertLinksIntoHead = require('./lib/insert-links-into-head');
 
 class PreloadPlugin {
   constructor(options) {
@@ -97,11 +97,10 @@ class PreloadPlugin {
       });
       links.push(linkElementString);
     }
-    
-    htmlPluginData.html = insertLinksIntoHeadWithScript({
+
+    htmlPluginData.html = insertLinksIntoHead({
       links,
       html: htmlPluginData.html,
-      delay: options.useScript && options.scriptDelay
     });
 
     return htmlPluginData;
