@@ -41,7 +41,7 @@ function insertLinksIntoHead({html, links=[], delay }) {
     return html;
   }
 
-  const content = typeof delay === undefined ? links.join('') : createLinksInjectionScript(links, delay);
+  const content = typeof delay === 'undefined' ? links.join('') : createLinksInjectionScript(links, delay);
 
   if (html.includes('</head>')) {
     // If a valid closing </head> is found, insert the new <link>s right before it.
