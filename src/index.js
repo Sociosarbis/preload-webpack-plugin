@@ -17,7 +17,6 @@
 
 const assert = require('assert');
 
-const createHTMLElementString = require('./lib/create-html-element-string');
 const defaultOptions = require('./lib/default-options');
 const determineAsValue = require('./lib/determine-as-value');
 const extractChunks = require('./lib/extract-chunks');
@@ -91,16 +90,17 @@ class PreloadPlugin {
         }
       }
 
-      const linkElementString = createHTMLElementString({
+      const linkElement = {
         attributes,
         elementName: 'link',
-      });
-      links.push(linkElementString);
+      };
+      links.push(linkElement);
     }
 
     htmlPluginData.html = insertLinksIntoHead({
       links,
       html: htmlPluginData.html,
+      delay: options.useScript ? options.scriptDelay : undefined
     });
 
     return htmlPluginData;

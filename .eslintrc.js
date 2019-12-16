@@ -17,5 +17,6 @@ module.exports = {
     'valid-jsdoc': 0,
     'comma-dangle': 0,
     'arrow-parens': 0,
+    'prettier/prettier': 0,
   }
 };

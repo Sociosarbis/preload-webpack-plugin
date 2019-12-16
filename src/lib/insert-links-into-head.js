@@ -14,34 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const UglifyJS = require('uglify-js');
+const createHTMLElementString = require('./create-html-element-string');
+
 function createLinksInjectionScript(links, delay) {
   return `<script>
-  if (!window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__) {
+  ${UglifyJS.minify(`if (!window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__) {
     window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__ = [];
   }
-  const timerId = setTimeout(() => {
-    const links = ${JSON.stringify(links)};
-    links.forEach((link) => {
-      const linkEl = document.createElement('link');
-      const { attributes } = link;
-      Object.keys(attributes).forEach((key) => linkEl.setAttribute(key, attributes[key]));
-      document.head.appendChild(linkEl);
-    })
-    const index = window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__.indexOf(timerId);
-    if (index !== -1) {
-      window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__.splice(index, 1);
-    }
-  }, ${delay});
-  window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS.push(timerId);
-  </script>`.replace(/\s/g, '')
+  (function () {
+    var timerId = setTimeout(function () {
+      var links = ${JSON.stringify(links)};
+      links.forEach(function (link) {
+        var linkEl = document.createElement('link');
+        var attributes = link.attributes;
+        Object.keys(attributes).forEach(function (key) { linkEl.setAttribute(key, attributes[key]) });
+        document.head.appendChild(linkEl);
+      })
+      var index = window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__.indexOf(timerId);
+      if (index !== -1) {
+        window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__.splice(index, 1);
+      }
+    }, ${delay});
+    window.__PRELOAD_WEBPACK_PLUGIN_TIMERIDS__.push(timerId);
+  })()`
+  ).code
+}
+  </script>`;
 }
 
-function insertLinksIntoHead({html, links=[], delay }) {
+function insertLinksIntoHead({html, links = [], delay}) {
   if (links.length === 0) {
     return html;
   }
 
-  const content = typeof delay === 'undefined' ? links.join('') : createLinksInjectionScript(links, delay);
+  const content =
+    typeof delay === 'undefined'
+      ? links.map(createHTMLElementString).join('')
+      : createLinksInjectionScript(links, delay);
 
   if (html.includes('</head>')) {
     // If a valid closing </head> is found, insert the new <link>s right before it.
