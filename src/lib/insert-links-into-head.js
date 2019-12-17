@@ -50,7 +50,7 @@ function insertLinksIntoHead({html, links = [], delay}) {
 
   const content =
     typeof delay === 'undefined'
-      ? links.map(createHTMLElementString).join('')
+      ? links.map((link) => typeof link === 'string' ? link : createHTMLElementString(link)).join('')
       : createLinksInjectionScript(links, delay);
 
   if (html.includes('</head>')) {
